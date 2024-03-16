@@ -1,0 +1,5 @@
+let foo = 1
+let bar = foo + 1
+const john = 90
+
+lean.print(bar)
