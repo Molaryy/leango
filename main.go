@@ -21,21 +21,21 @@ func Split(r rune) bool {
 
 func parseFile(filePath string) {
 	var tokens []string
-	var tokenFunctions map[string]func([]string, int) = Token.TokenHandler()
+	var tokenFunctions map[string]func([]string, int) = Token.Handler()
 	data, err := os.ReadFile(filePath)
 
 	checkErr(err)
 	lines := strings.Split(string(data), "\n")
 
 	for _, line := range lines {
-		tokens = strings.FieldsFunc(line, Split)
-		for idx, token := range tokens {
-			if Token.IsTokenAvailable(token) {
-				tokenFunctions[token](tokens, idx+1)
+		if line != "" {
+			tokens = strings.FieldsFunc(line, Split)
+			for idx, token := range tokens {
+				if Token.IsTokenAvailable(token) {
+					tokenFunctions[token](tokens, idx+1)
+				}
 			}
-			fmt.Println(token)
 		}
-		fmt.Println("")
 	}
 }
 

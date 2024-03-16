@@ -1,4 +1,4 @@
-let foo
+let foo = "fef
 let bar = foo + 1
 const john = 90
 
