@@ -1,8 +1,8 @@
 package Variable
 
 type Variable struct {
-	isNumeric bool
-	isString  bool
-	isArray   bool
-	value     any
+	IsNumeric bool
+	IsString  bool
+	IsMutable bool
+	Value     any
 }

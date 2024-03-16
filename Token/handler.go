@@ -2,13 +2,14 @@ package Token
 
 import (
 	"fmt"
+	"leango/Logger"
 	"leango/Variable"
 	"slices"
+	"strconv"
 )
 
 var availableTokens = []string{"let", "const", "lean"}
-var availableMutableVariables = make(map[string]Variable.Variable)
-var availableNonMutableVariables = make(map[string]Variable.Variable)
+var availableVariables = make(map[string]Variable.Variable)
 
 func TokenHandler() map[string]func([]string, int) {
 	var TokenMapFunction = make(map[string]func([]string, int))
@@ -19,20 +20,32 @@ func TokenHandler() map[string]func([]string, int) {
 	return TokenMapFunction
 }
 
-func isLet(rows []string, line int) {
-	index := slices.Index(rows, "=")
+func isLet(rows []string, nbLine int) {
+	indexEqualSign := slices.Index(rows, "=")
+	lenRows := len(rows)
+	var tokenValue []string
 
-	if len(rows) == 1 {
-		panic(fmt.Sprintf("Nothing found after the declaration of let at line %d", line))
+	if lenRows < 2 {
+		Logger.Fatal(nbLine, "Nothing found after the declaration of let")
 	}
-
-	if index == -1 {
-		panic(fmt.Sprintf("A value was not set for %s", rows[1]))
+	fmt.Println(indexEqualSign)
+	if indexEqualSign == 2 && lenRows == 3 {
+		Logger.Fatal(nbLine, fmt.Sprintf("A value was not set for %s", rows[1]))
 	}
+	if _, varNameExists := availableVariables[rows[1]]; varNameExists {
+		Logger.Fatal(nbLine, fmt.Sprintf("A variable aleady exists with the same name %s: line %d", rows[1], nbLine))
+	}
+	if indexEqualSign == 2 {
+		tokenValue = rows[indexEqualSign+1:]
 
-	value := rows[index+1:]
-	fmt.Println(value)
-	fmt.Println("Is a let variable and the value is = ")
+		if intValue, err := strconv.Atoi(tokenValue[0]); err == nil {
+			availableVariables[rows[1]] = Variable.Variable{IsNumeric: true, Value: intValue}
+		} else {
+			availableVariables[rows[1]] = Variable.Variable{IsNumeric: true, Value: intValue}
+		}
+	} else {
+		availableVariables[rows[1]] = Variable.Variable{Value: nil}
+	}
 }
 
 func isConst(rows []string, line int) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	logger "github.com/sirupsen/logrus"
 	"leango/Token"
 	"log"
 	"os"
@@ -41,6 +42,9 @@ func parseFile(filePath string) {
 func main() {
 	if len(os.Args) != 2 {
 		log.Default().Fatal("Not enough arguments\n./leango [filepath]")
+	}
+	if !(strings.HasSuffix(os.Args[1], ".leango")) {
+		logger.WithFields(logger.Fields{}).Fatal(fmt.Sprintf("Incorrect file extension [%s]", os.Args[1]))
 	}
 	parseFile(os.Args[1])
 }
