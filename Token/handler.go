@@ -11,6 +11,7 @@ import (
 
 var availableTokens = []string{"let", "const", "lean"}
 var availableVariables = make(map[string]Variable.Variable)
+var singleVariableValue = 1
 
 func Handler() map[string]func([]string, int) {
 	var TokenMapFunction = make(map[string]func([]string, int))
@@ -32,13 +33,74 @@ func handleString(nbLine int, value string) (string, bool) {
 	return "", false
 }
 
-func handleVariableType(nbLine int, rows []string, indexEqualSign int) {
-	var tokenValue = rows[indexEqualSign+1:]
+func getArithmeticOperation(firstValue int, operator string, secondValue int, nbLine int) int {
+    switch operator {
+        case "+": return firstValue + secondValue
+        case "-": return firstValue - secondValue
+        case "*": return firstValue * secondValue
+        case "/":
+            if secondValue == 0 {
+                Logger.Fatal(nbLine, "You tried to divise by 0 at ")
+            }
+            return firstValue / secondValue
+        case "%": return firstValue % secondValue
+    }
+    Logger.Fatal(nbLine, "An error has occured")
+    return 0
+}
 
-	if intValue, err := strconv.Atoi(tokenValue[0]); err == nil {
-		availableVariables[rows[1]] = Variable.Variable{IsNumeric: true, Value: intValue}
-	} else if strValue, isStr := handleString(nbLine, tokenValue[0]); isStr == true {
-		availableVariables[rows[1]] = Variable.Variable{IsString: true, Value: strValue}
+func handleNumericOperations(rows []string, tokens []string, nbLine int) {
+    tokensLen := len(tokens)
+    sum := 0
+    firstOp := true
+    var opt string
+
+    for idx := 0; idx < tokensLen;  {
+        fstValue, err := strconv.Atoi(tokens[idx])
+        if err != nil {
+            Logger.Fatal(nbLine, "Trying to do arithmetic operation with another type than an Int")
+        }
+        if idx + 1 >= tokensLen {
+            break
+        }
+        opt = tokens[idx + 1]
+        if idx + 2 >= tokensLen {
+            Logger.Fatal(nbLine, "There is no value after the aritmetic operation")
+        }
+        scdValue, err := strconv.Atoi(tokens[idx + 2])
+        if err != nil {
+            Logger.Fatal(nbLine, "Trying to do arithmetic operation with another type than an Int")
+        }
+        if firstOp {
+            sum += getArithmeticOperation(fstValue, opt, scdValue, nbLine)
+            firstOp = false
+        } else {
+            sum = getArithmeticOperation(sum, opt, scdValue, nbLine)
+        }
+        idx += 2
+    }
+    availableVariables[rows[1]] = Variable.Variable{IsNumeric: true, Value: sum, IsMutable: true}
+}
+
+func handleArithmeticOperations(tokens []string, rows []string, nbLine int) {
+    if _, err := strconv.Atoi(tokens[0]); err == nil {
+        handleNumericOperations(rows, tokens, nbLine)
+	} else if strValue, isStr := handleString(nbLine, tokens[0]); isStr == true {
+	   	availableVariables[rows[1]] = Variable.Variable{IsString: true, Value: strValue}
+	}
+}
+
+func handleVariableType(nbLine int, rows []string, indexEqualSign int) {
+	var tokenValues = rows[indexEqualSign+1:]
+	
+	if (len(tokenValues) == singleVariableValue) {
+	   if intValue, err := strconv.Atoi(tokenValues[0]); err == nil {
+	   	availableVariables[rows[1]] = Variable.Variable{IsNumeric: true, Value: intValue}
+	   } else if strValue, isStr := handleString(nbLine, tokenValues[0]); isStr == true {
+	   	availableVariables[rows[1]] = Variable.Variable{IsString: true, Value: strValue}
+	   }
+	} else {
+	   handleArithmeticOperations(tokenValues, rows, nbLine)
 	}
 }
 
@@ -58,7 +120,7 @@ func isLet(rows []string, nbLine int) {
 	if indexEqualSign == 2 {
 		handleVariableType(nbLine, rows, indexEqualSign)
 	} else {
-		availableVariables[rows[1]] = Variable.Variable{Value: nil}
+		availableVariables[rows[1]] = Variable.Variable{Value: nil, IsMutable: true}
 	}
 }
 
