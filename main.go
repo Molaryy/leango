@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	logger "github.com/sirupsen/logrus"
+	"leango/Logger"
 	"leango/Token"
 	"log"
 	"os"
@@ -27,10 +28,14 @@ func parseFile(filePath string) {
 	checkErr(err)
 	lines := strings.Split(string(data), "\n")
 
-	for _, line := range lines {
+	for idxLine, line := range lines {
 		if line != "" {
 			tokens = strings.FieldsFunc(line, Split)
 			for idx, token := range tokens {
+				_, varNameExists := tokenFunctions[token]
+				if idx > 0 && varNameExists {
+					Logger.Fatal(idxLine, "You can't name a variable with the same name as a type")
+				}
 				if Token.IsTokenAvailable(token) {
 					tokenFunctions[token](tokens, idx+1)
 				}
@@ -47,5 +52,6 @@ func main() {
 	if !strings.HasSuffix(os.Args[1], ".leango") {
 		logger.WithFields(logger.Fields{}).Fatal(fmt.Sprintf("Incorrect file extension [%s]", os.Args[1]))
 	}
+
 	parseFile(os.Args[1])
 }
