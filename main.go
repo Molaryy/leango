@@ -34,7 +34,7 @@ func parseFile(filePath string) {
 			for idx, token := range tokens {
 				_, varNameExists := tokenFunctions[token]
 				if idx > 0 && varNameExists {
-					Logger.Fatal(idxLine, "You can't name a variable with the same name as a type")
+					Logger.Fatal(idxLine, "you can't name a variable with the same name as a type")
 				}
 				if Token.IsTokenAvailable(token) {
 					tokenFunctions[token](tokens, idx+1)
@@ -47,10 +47,10 @@ func parseFile(filePath string) {
 
 func main() {
 	if len(os.Args) != 2 {
-		log.Default().Fatal("Not enough arguments\n./leango [filepath]")
+		log.Default().Fatal("not enough arguments\n./leango [filepath]")
 	}
 	if !strings.HasSuffix(os.Args[1], ".leango") {
-		logger.WithFields(logger.Fields{}).Fatal(fmt.Sprintf("Incorrect file extension [%s]", os.Args[1]))
+		logger.WithFields(logger.Fields{}).Fatal(fmt.Sprintf("incorrect file extension [%s]", os.Args[1]))
 	}
 
 	parseFile(os.Args[1])
