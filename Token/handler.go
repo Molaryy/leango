@@ -9,9 +9,11 @@ import (
 	"strings"
 )
 
-var availableTokens = []string{"let", "const", "lean"}
-var availableVariables = make(map[string]Variable.Variable)
-var singleVariableValue = 1
+var (
+	availableTokens     = []string{"let", "const", "lean"}
+	availableVariables  = make(map[string]Variable.Variable)
+	singleVariableValue = 1
+)
 
 func Handler() map[string]func([]string, int) {
 	var TokenMapFunction = make(map[string]func([]string, int))
