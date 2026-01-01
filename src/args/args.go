@@ -7,15 +7,15 @@ import (
 )
 
 type Flag struct {
-	Name string
-	Shorthand string
+	Name         string
+	Shorthand    string
 	ExpectsValue bool
-	Description string
+	Description  string
 }
 
 type File struct {
 	Filepath string
-	Src []byte
+	Src      []byte
 }
 
 type Arguments struct {
@@ -45,19 +45,19 @@ func GetArguments(existingFlags []Flag, args []string) (Arguments, error) {
 			continue
 		}
 		info, err := os.Stat(arg)
-			if err != nil {
-    			return Arguments{}, fmt.Errorf("input file %q: %w", arg, err)
-			}
-			if info.IsDir() {
-    			return Arguments{}, fmt.Errorf("input file %q is a directory", arg)
-			}
+		if err != nil {
+			return Arguments{}, fmt.Errorf("input file %q: %w", arg, err)
+		}
+		if info.IsDir() {
+			return Arguments{}, fmt.Errorf("input file %q is a directory", arg)
+		}
 		if strings.HasSuffix(arg, ".leango") {
 			content, err := os.ReadFile(arg)
 			if err != nil {
 				return Arguments{}, err
 			}
 
-			files = append(files, File{Filepath: arg,  Src: content})
+			files = append(files, File{Filepath: arg, Src: content})
 		} else {
 			return Arguments{}, fmt.Errorf("named files must be .leango files: %s", arg)
 		}
@@ -65,4 +65,3 @@ func GetArguments(existingFlags []Flag, args []string) (Arguments, error) {
 
 	return Arguments{Flags: flags, Files: files}, nil
 }
-

@@ -66,7 +66,6 @@ func main() {
 	flags := arguments.Flags
 	files := arguments.Files
 
-
 	fmt.Println(flags)
 	fmt.Println(files)
 
