@@ -8,13 +8,11 @@ import (
 )
 
 func main() {
-	existingFlags := []arguments.Flag{
-		{
-			Name:         "--debug",
-			Shorthand:    "-d",
+	existingFlags := make(map[string]arguments.Flag)
+
+	existingFlags["--debug"] = arguments.Flag {
 			ExpectsValue: false,
 			Description:  "debugging mode is enabled for leango",
-		},
 	}
 	args := os.Args[1:]
 

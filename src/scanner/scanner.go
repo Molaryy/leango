@@ -1,9 +1,9 @@
 package scanner
 
 import (
+	"fmt"
 	arguments "leango/src/Args"
 	"leango/src/Token"
-	"strings"
 )
 
 func getSupportedKeywords() []string {
@@ -31,20 +31,16 @@ const (
 	
 )
 
-func isDelimiter(c rune) bool {
-	if strings.ContainsRune(delimiters, c) {
-		return true
-	}
-	return false
-}
-
-func ScanFile(flags []arguments.Flag, file arguments.File) {
+func ScanFile(flags map[string]arguments.Flag, file arguments.File) {
 	var tokens []Token.Token
 
 	for  _, b := range file.Src {
-		if isDelimiter(rune(b)) {
-			tokens = append(tokens, Token.Token{Type: "DELIMITER", Value: b})
-		}
+		switch b {
+			case '{', '}', '[', ']', '(', ')', ';', '=', '+', '*', '/', '-':
+				tokens = append(tokens, Token.Token{Type: "DELIMITER", Value: b})
+				continue
+			}
 	}
+	fmt.Println(tokens)
 }
 

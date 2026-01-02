@@ -7,8 +7,6 @@ import (
 )
 
 type Flag struct {
-	Name         string
-	Shorthand    string
 	ExpectsValue bool
 	Description  string
 }
@@ -19,31 +17,21 @@ type File struct {
 }
 
 type Arguments struct {
-	Flags []Flag
+	Flags map[string]Flag
 	Files []File
 }
 
-// Compares the givent argument with the existingFlags argument and retrieves the result if it exists based on the matching name or shorthanded name
-func findFlag(existingFlags []Flag, arg string) (*Flag, bool) {
-	for _, flag := range existingFlags {
-		if flag.Name == arg || flag.Shorthand == arg {
-			return &flag, true
-		}
-	}
-	return nil, false
-}
-
-// Get flags & files from leango arguments
-func GetArguments(existingFlags []Flag, args []string) (Arguments, error) {
-	flags := []Flag{}
+func GetArguments(existingFlags map[string]Flag, args []string) (Arguments, error) {
+	flags := map[string]Flag{}
 	files := []File{}
 
 	for _, arg := range args {
-		flag, exists := findFlag(existingFlags, arg)
+		flag, exists := existingFlags[arg]
 		if exists {
-			flags = append(flags, *flag)
+			flags[arg] = flag
 			continue
 		}
+
 		info, err := os.Stat(arg)
 		if err != nil {
 			return Arguments{}, fmt.Errorf("input file %q: %w", arg, err)
