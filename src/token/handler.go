@@ -1,14 +1,19 @@
 package Token
 
+/*
 import (
 	"fmt"
 	"leango/src/Logger"
-	"leango/src/Variable"
 	"slices"
 	"strconv"
 	"strings"
 )
-
+*/
+type Token struct {
+	Type string
+	Value any
+}
+/*
 var (
 	availableTokens     = []string{"let", "const", "lean"}
 	availableVariables  = make(map[string]Variable.Variable)
@@ -134,3 +139,4 @@ func isLet(rows []string, nbLine int) {
 func isConst(rows []string, line int) {
 	fmt.Println("Is a const variable")
 }
+*/

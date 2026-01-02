@@ -1,11 +1,7 @@
 package Token
 
-import (
-	"fmt"
-	"leango/src/Logger"
-	"leango/src/Variable"
-)
 
+/*
 func IsTokenAvailable(token string) bool {
 	for _, t := range availableTokens {
 		if token == t {
@@ -42,3 +38,4 @@ func ShowVariables() {
 		Logger.Debug("-------------------------\n\n")
 	}
 }
+*/
