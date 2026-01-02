@@ -9,9 +9,8 @@ import (
 
 func IsDebugActivated(flags map[string]arguments.Flag) bool {
 	_, existsLong := flags["--debug"]
-	_, existsShort := flags["-d"]
 
-	if existsLong || existsShort {
+	if existsLong {
 		return true
 	}
 	return false
