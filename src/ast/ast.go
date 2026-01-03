@@ -3,18 +3,18 @@ package ast
 import "leango/src/Token"
 
 type ASTNode struct {
-	Parent *ASTNode
+	Parent   *ASTNode
 	Children *ASTNode
-	Next *ASTNode
-	Token Token.Token
+	Next     *ASTNode
+	Token    Token.Token
 }
 
 func AddNewChildren(token Token.Token, ast *ASTNode) *ASTNode {
 	newNode := &ASTNode{
-		Token: token,
-		Parent: nil,
+		Token:    token,
+		Parent:   nil,
 		Children: nil,
-		Next: nil,
+		Next:     nil,
 	}
 
 	if ast == nil {
@@ -27,10 +27,10 @@ func AddNewChildren(token Token.Token, ast *ASTNode) *ASTNode {
 
 func AddToExistingChildren(token Token.Token, ast *ASTNode) *ASTNode {
 	newNode := &ASTNode{
-		Token: token,
-		Parent: nil,
+		Token:    token,
+		Parent:   nil,
 		Children: nil,
-		Next: nil,
+		Next:     nil,
 	}
 
 	if ast == nil {
@@ -46,4 +46,3 @@ func AddToExistingChildren(token Token.Token, ast *ASTNode) *ASTNode {
 	ast = tmp
 	return ast
 }
-
