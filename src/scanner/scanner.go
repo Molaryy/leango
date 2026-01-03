@@ -2,12 +2,13 @@ package scanner
 
 import (
 	"fmt"
+	"leango/pkg/debugger"
 	arguments "leango/src/Args"
 	"leango/src/Token"
 )
 
 func getSupportedKeywords() []string {
-	return []string {
+	return []string{
 		"let",
 		"const",
 		"function",
@@ -17,7 +18,7 @@ func getSupportedKeywords() []string {
 }
 
 func getSupportedTokenTypes() []string {
-	return []string {
+	return []string{
 		"KEYWORD",
 		"IDENTIFIER",
 		"ASSIGN",
@@ -26,21 +27,40 @@ func getSupportedTokenTypes() []string {
 	}
 }
 
-const (
-	delimiters = "{}[]();=+*/"
-	
-)
-
-func ScanFile(flags map[string]arguments.Flag, file arguments.File) {
+func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Token {
 	var tokens []Token.Token
+	isReadingString := false
+	var token string = ""
 
-	for  _, b := range file.Src {
-		switch b {
+	for fileIndex, b := range file.Src {
+		if isReadingString == false {
+			switch b {
 			case '{', '}', '[', ']', '(', ')', ';', '=', '+', '*', '/', '-':
 				tokens = append(tokens, Token.Token{Type: "DELIMITER", Value: b})
 				continue
 			}
+		}
+		if b == '"' {
+			if isReadingString == false {
+				isReadingString = true
+				continue
+			} else if fileIndex-1 > 0 && file.Src[fileIndex-1] != '\\' {
+				tokens = append(tokens, Token.Token{Type: "STRING_VALUE", Value: token})
+				token = ""
+				isReadingString = false
+				continue
+			}
+		}
+		if isReadingString {
+			token += string(b)
+		}
 	}
-	fmt.Println(tokens)
-}
+	if debugger.IsDebugActivated(flags) {
+		for _, t := range tokens {
+			debugger.PrintToken(t)
+		}
+		fmt.Println()
+	}
 
+	return tokens
+}
