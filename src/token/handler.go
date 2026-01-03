@@ -9,10 +9,12 @@ import (
 	"strings"
 )
 */
+
 type Token struct {
-	Type string
+	Type  string
 	Value any
 }
+
 /*
 var (
 	availableTokens     = []string{"let", "const", "lean"}
