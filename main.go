@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"leango/pkg/debugger"
+	"leango/pkg/helper"
 	arguments "leango/src/Args"
 	"leango/src/Scanner"
 	"os"
@@ -10,9 +12,9 @@ import (
 func main() {
 	existingFlags := make(map[string]arguments.Flag)
 
-	existingFlags["--debug"] = arguments.Flag {
-			ExpectsValue: false,
-			Description:  "debugging mode is enabled for leango",
+	existingFlags["--debug"] = arguments.Flag{
+		ExpectsValue: false,
+		Description:  "debugging mode is enabled for leango",
 	}
 	args := os.Args[1:]
 
@@ -23,12 +25,19 @@ func main() {
 		return
 	}
 
-	// TODO: at the moment, if a flag is set with the shorthanded one, both of them will be stored
 	flags := arguments.Flags
 	files := arguments.Files
 
+	_, ok := flags["--help"]
+	if ok || !arguments.HasProvidedFiles {
+		helper.Helper()
+		return
+	}
+
 	for _, file := range files {
+		if debugger.IsDebugActivated(flags) {
+			fmt.Printf("Scanning %s%s%s\n", debugger.BLUE, file.Filepath, debugger.RESET)
+		}
 		scanner.ScanFile(flags, file)
 	}
 }
-
