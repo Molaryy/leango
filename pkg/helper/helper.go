@@ -2,7 +2,6 @@ package helper
 
 import "fmt"
 
-
 func Helper() {
 	fmt.Println("Leango is a tool for managing leango source code.\n")
 	fmt.Println("Usage\n\n\tleango [options] file...")
