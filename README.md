@@ -2,7 +2,8 @@
 
 Started building my own interpreter.
 
-> **_NOTE:_** Work in progress
+> [!WARNING]
+> Work in progress, AST is not implemented yet
 
 Build:
 ```sh
