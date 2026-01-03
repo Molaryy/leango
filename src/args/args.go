@@ -17,13 +17,15 @@ type File struct {
 }
 
 type Arguments struct {
-	Flags map[string]Flag
-	Files []File
+	Flags            map[string]Flag
+	Files            []File
+	HasProvidedFiles bool
 }
 
 func GetArguments(existingFlags map[string]Flag, args []string) (Arguments, error) {
 	flags := map[string]Flag{}
 	files := []File{}
+	hasProvidedFiles := false
 
 	for _, arg := range args {
 		flag, exists := existingFlags[arg]
@@ -36,6 +38,7 @@ func GetArguments(existingFlags map[string]Flag, args []string) (Arguments, erro
 		if err != nil {
 			return Arguments{}, fmt.Errorf("input file %q: %w", arg, err)
 		}
+
 		if info.IsDir() {
 			return Arguments{}, fmt.Errorf("input file %q is a directory", arg)
 		}
@@ -46,10 +49,14 @@ func GetArguments(existingFlags map[string]Flag, args []string) (Arguments, erro
 			}
 
 			files = append(files, File{Filepath: arg, Src: content})
+
+			if !hasProvidedFiles {
+				hasProvidedFiles = true
+			}
 		} else {
 			return Arguments{}, fmt.Errorf("named files must be .leango files: %s", arg)
 		}
 	}
 
-	return Arguments{Flags: flags, Files: files}, nil
+	return Arguments{Flags: flags, Files: files, HasProvidedFiles: hasProvidedFiles}, nil
 }
