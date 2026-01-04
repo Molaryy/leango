@@ -14,39 +14,30 @@ func scanDelimiterAndOperator(b byte) (Token.Token, bool) {
 	switch b {
 		case '{':
 			tok = Token.Token{Type: "DELIMITER_OPEN_BRACE", Value: b}
-			found = true
 		case '}':
 			tok = Token.Token{Type: "DELIMITER_CLOSE_BRACE", Value: b}
-			found = true
 		case '[':
 			tok = Token.Token{Type: "DELIMITER_OPEN_BRACKET", Value: b}
-			found = true
 		case ']':
 			tok = Token.Token{Type: "DELIMITER_CLOSE_BRACKET", Value: b}
-			found = true
 		case '(':
 			tok = Token.Token{Type: "DELIMITER_OPEN_PARENTHESES", Value: b}
-			found = true
 		case ')':
 			tok = Token.Token{Type: "DELIMITER_CLOSE_PARENTHESES", Value: b}
-			found = true
 		case ';':
 			tok = Token.Token{Type: "DELIMITER_SEMICOLON", Value: b}
-			found = true
 		case '=':
 			tok = Token.Token{Type: "OPERATOR_ASSIGN", Value: b}
-			found = true
 		case '+':
 			tok = Token.Token{Type: "OPERATOR_ADDITION", Value: b}
-			found = true
 		case '-':
 			tok = Token.Token{Type: "OPERATOR_SUBTRACTION", Value: b}
-			found = true
 		case '*':
 			tok = Token.Token{Type: "OPERATOR_MULTIPLICATION", Value: b}
-			found = true
 		case '/':
 			tok = Token.Token{Type: "OPERATOR_DIVISION", Value: b}
+		}
+		if tok.Type != "" {
 			found = true
 		}
 		return tok, found
