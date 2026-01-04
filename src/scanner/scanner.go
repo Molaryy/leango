@@ -7,7 +7,7 @@ import (
 	"leango/src/Token"
 )
 
-func scanDelimiter(b byte) (Token.Token, bool) {
+func scanDelimiterAndOperator(b byte) (Token.Token, bool) {
 	var tok Token.Token
 	found := false
 
@@ -34,23 +34,28 @@ func scanDelimiter(b byte) (Token.Token, bool) {
 			tok = Token.Token{Type: "DELIMITER_SEMICOLON", Value: b}
 			found = true
 		case '=':
-			tok = Token.Token{Type: "DELIMITER_ASSIGN", Value: b}
+			tok = Token.Token{Type: "OPERATOR_ASSIGN", Value: b}
 			found = true
 		case '+':
-			tok = Token.Token{Type: "DELIMITER_ADDITION", Value: b}
+			tok = Token.Token{Type: "OPERATOR_ADDITION", Value: b}
 			found = true
 		case '-':
-			tok = Token.Token{Type: "DELIMITER_SUBTRACTION", Value: b}
+			tok = Token.Token{Type: "OPERATOR_SUBTRACTION", Value: b}
 			found = true
 		case '*':
-			tok = Token.Token{Type: "DELIMITER_MULTIPLICATION", Value: b}
+			tok = Token.Token{Type: "OPERATOR_MULTIPLICATION", Value: b}
 			found = true
 		case '/':
-			tok = Token.Token{Type: "DELIMITER_DIVISION", Value: b}
+			tok = Token.Token{Type: "OPERATOR_DIVISION", Value: b}
 			found = true
 		}
 		return tok, found
 }
+
+// TODO: having environnment for functions and variables as maps for checking
+//       res, ok := env.Variables["foo"]
+//       if the foo variable is used without existing then an error will occur
+//       if not it will just access it, same thing for functions
 
 func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Token {
 	var tokens []Token.Token
@@ -59,7 +64,7 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Toke
 
 	for fileIndex, b := range file.Src {
 		if isReadingString == false {
-			tok, ok := scanDelimiter(b)
+			tok, ok := scanDelimiterAndOperator(b)
 			if ok {
 				tokens = append(tokens, tok)
 			}
