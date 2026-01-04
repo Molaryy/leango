@@ -7,24 +7,49 @@ import (
 	"leango/src/Token"
 )
 
-func getSupportedKeywords() []string {
-	return []string{
-		"let",
-		"const",
-		"function",
-		"for",
-		"return",
-	}
-}
+func scanDelimiter(b byte) (Token.Token, bool) {
+	var tok Token.Token
+	found := false
 
-func getSupportedTokenTypes() []string {
-	return []string{
-		"KEYWORD",
-		"IDENTIFIER",
-		"ASSIGN",
-		"VALUE",
-		"DELIMITER",
-	}
+	switch b {
+		case '{':
+			tok = Token.Token{Type: "DELIMITER_OPEN_BRACE", Value: b}
+			found = true
+		case '}':
+			tok = Token.Token{Type: "DELIMITER_CLOSE_BRACE", Value: b}
+			found = true
+		case '[':
+			tok = Token.Token{Type: "DELIMITER_OPEN_BRACKET", Value: b}
+			found = true
+		case ']':
+			tok = Token.Token{Type: "DELIMITER_CLOSE_BRACKET", Value: b}
+			found = true
+		case '(':
+			tok = Token.Token{Type: "DELIMITER_OPEN_PARENTHESES", Value: b}
+			found = true
+		case ')':
+			tok = Token.Token{Type: "DELIMITER_CLOSE_PARENTHESES", Value: b}
+			found = true
+		case ';':
+			tok = Token.Token{Type: "DELIMITER_SEMICOLON", Value: b}
+			found = true
+		case '=':
+			tok = Token.Token{Type: "DELIMITER_ASSIGN", Value: b}
+			found = true
+		case '+':
+			tok = Token.Token{Type: "DELIMITER_ADDITION", Value: b}
+			found = true
+		case '-':
+			tok = Token.Token{Type: "DELIMITER_SUBTRACTION", Value: b}
+			found = true
+		case '*':
+			tok = Token.Token{Type: "DELIMITER_MULTIPLICATION", Value: b}
+			found = true
+		case '/':
+			tok = Token.Token{Type: "DELIMITER_DIVISION", Value: b}
+			found = true
+		}
+		return tok, found
 }
 
 func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Token {
@@ -34,10 +59,9 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Toke
 
 	for fileIndex, b := range file.Src {
 		if isReadingString == false {
-			switch b {
-			case '{', '}', '[', ']', '(', ')', ';', '=', '+', '*', '/', '-':
-				tokens = append(tokens, Token.Token{Type: "DELIMITER", Value: b})
-				continue
+			tok, ok := scanDelimiter(b)
+			if ok {
+				tokens = append(tokens, tok)
 			}
 		}
 		if b == '"' {
@@ -45,7 +69,7 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Toke
 				isReadingString = true
 				continue
 			} else if fileIndex-1 > 0 && file.Src[fileIndex-1] != '\\' {
-				tokens = append(tokens, Token.Token{Type: "STRING_VALUE", Value: token})
+				tokens = append(tokens, Token.Token{Type: "VALUE_STRING", Value: token})
 				token = ""
 				isReadingString = false
 				continue
@@ -55,6 +79,7 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []Token.Toke
 			token += string(b)
 		}
 	}
+
 	if debugger.IsDebugActivated(flags) {
 		for _, t := range tokens {
 			debugger.PrintToken(t)
