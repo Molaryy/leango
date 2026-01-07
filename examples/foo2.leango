@@ -1,0 +1,2 @@
+let test1 = 90
+let test2 = test1 + 25

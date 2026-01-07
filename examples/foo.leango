@@ -1,5 +1,6 @@
 let foo = "fef"
 let bar = foo + 1
 const john = 90
+let test1 = 90
 
 lean.print(bar)
