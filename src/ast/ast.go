@@ -1,15 +1,15 @@
 package ast
 
-import "leango/src/Token"
+import "leango/src/token"
 
 type ASTNode struct {
 	Parent   *ASTNode
 	Children *ASTNode
 	Next     *ASTNode
-	Token    Token.Token
+	Token    token.Token
 }
 
-func AddNewChildren(token Token.Token, ast *ASTNode) *ASTNode {
+func AddNewChildren(token token.Token, ast *ASTNode) *ASTNode {
 	newNode := &ASTNode{
 		Token:    token,
 		Parent:   nil,
@@ -25,7 +25,7 @@ func AddNewChildren(token Token.Token, ast *ASTNode) *ASTNode {
 	return ast
 }
 
-func AddToExistingChildren(token Token.Token, ast *ASTNode) *ASTNode {
+func AddToExistingChildren(token token.Token, ast *ASTNode) *ASTNode {
 	newNode := &ASTNode{
 		Token:    token,
 		Parent:   nil,
