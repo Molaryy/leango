@@ -3,7 +3,7 @@ package debugger
 import (
 	"fmt"
 	arguments "leango/src/Args"
-	"leango/src/Token"
+	"leango/src/token"
 	"time"
 )
 
@@ -24,24 +24,28 @@ func IsDebugActivated(flags map[string]arguments.Flag) bool {
 	return false
 }
 
-func PrintToken(token Token.Token) {
+func PrintToken(token token.Token) {
 	str := fmt.Sprintf("Type: %s ", token.Type)
-	switch v := token.Value.(type) {
-	case int:
-		str += fmt.Sprintf("Value: %d\n", v)
-	case string:
-		str += fmt.Sprintf("Value: %s\n", v)
-	case bool:
-		str += fmt.Sprintf("Value: %t\n", v)
-	case byte:
-		str += fmt.Sprintf("Value: %c\n", v)
-	default:
-		str += fmt.Sprintf("Unknown type: %T\n", v)
+
+	if token.HasValue {
+		switch v := token.Value.(type) {
+		case int:
+			str += fmt.Sprintf("Value: %d", v)
+		case string:
+			str += fmt.Sprintf("Value: %s", v)
+		case bool:
+			str += fmt.Sprintf("Value: %t", v)
+		case byte:
+			str += fmt.Sprintf("Value: %c", v)
+		default:
+			str += fmt.Sprintf("Unknown type: %T", v)
+		}
 	}
-	fmt.Printf(str)
+
+	fmt.Printf("%s\n", str)
 }
 
-func PrintTokenAndSleep(token Token.Token, seconds int64) {
+func PrintTokenAndSleep(token token.Token, seconds int64) {
 	PrintToken(token)
 	time.Sleep(time.Second * time.Duration(seconds))
 }
