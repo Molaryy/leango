@@ -1,4 +1,4 @@
-package Token
+package token
 
 /*
 func IsTokenAvailable(token string) bool {
