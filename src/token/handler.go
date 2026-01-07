@@ -1,4 +1,4 @@
-package Token
+package token
 
 /*
 import (
@@ -11,8 +11,9 @@ import (
 */
 
 type Token struct {
-	Type  string
-	Value any
+	Type     string
+	Value    any
+	HasValue bool
 }
 
 /*
