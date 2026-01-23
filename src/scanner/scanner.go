@@ -3,7 +3,7 @@ package scanner
 import (
 	"fmt"
 	"leango/pkg/debugger"
-	arguments "leango/src/Args"
+	arguments "leango/src/args"
 	"leango/src/token"
 	"math"
 	"strings"
@@ -51,7 +51,7 @@ func scanDelimiterAndOperator(b byte) (token.Token, bool) {
 //       if not it will just access it, same thing for functions
 
 func cutWord(indexSrc int, src []byte, lenSrc int) (int, string) {
-	buffer := ""
+	var buffer strings.Builder
 	finalIndex := indexSrc
 
 	for finalIndex < lenSrc {
@@ -59,10 +59,10 @@ func cutWord(indexSrc int, src []byte, lenSrc int) (int, string) {
 		if src[finalIndex] == ' ' || src[finalIndex] == '"' || src[finalIndex] == '\n' || stop {
 			break
 		}
-		buffer += string(src[finalIndex])
+		buffer.WriteByte(src[finalIndex])
 		finalIndex++
 	}
-	return finalIndex, buffer
+	return finalIndex, buffer.String()
 }
 
 func scanKeyword(str string) (token.Token, bool) {
@@ -90,12 +90,12 @@ func scanKeyword(str string) (token.Token, bool) {
 
 func scanIntNumber(str string) (token.Token, bool) {
 	var tok token.Token
+	var foundNumber float64 = 0
 	found := false
 	sign := 1
 	strIndex := 0
 	strLen := len(str)
 	nbOfSigns := 0
-	var foundNumber float64 = 0
 	hasError := false
 
 	if str[0] != '-' && str[0] != '+' && str[0] < '0' || str[0] > '9' {
@@ -104,9 +104,9 @@ func scanIntNumber(str string) (token.Token, bool) {
 
 	if str[0] == '-' {
 		sign = -1
-		 nbOfSigns += 1
+		nbOfSigns += 1
 	}
-	for i := 1; i < strLen && str[i] == '-' ||  str[i] == '+'; i++ {
+	for i := 1; i < strLen && str[i] == '-' || str[i] == '+'; i++ {
 		if str[0] == '-' {
 			sign *= -1
 		} else {
@@ -115,26 +115,31 @@ func scanIntNumber(str string) (token.Token, bool) {
 		strIndex = i
 		nbOfSigns += 1
 	}
-	remainingLen:= strLen - nbOfSigns
+	remainingLen := strLen - nbOfSigns
 	var unexpextedStr strings.Builder
-	for strIndex < strLen {
+	for strIndex < strLen && remainingLen > 0 {
 		if str[strIndex] < '0' || str[strIndex] > '9' && hasError == false {
 			hasError = true
 		}
-		if remainingLen > 0 && hasError == false {
-			foundNumber += (float64(str[strIndex]) - 48) * math.Pow10(remainingLen - 1)
-		}
 		if hasError {
 			unexpextedStr.WriteByte(str[strIndex])
+		} else {
+			foundNumber += (float64(str[strIndex]) - '0') * math.Pow10(remainingLen-1)
 		}
 		strIndex++
 		remainingLen--
 	}
 
 	if hasError {
-		fmt.Println("Found unexpextedStr == ", unexpextedStr.String())
+		fmt.Println("syntax error found unexpexted value: ", unexpextedStr.String())
+	} else {
+		found = true
+		tok = token.Token{
+			Type:     "INTEGER",
+			Value:    int(foundNumber),
+			HasValue: true,
+		}
 	}
-
 	return tok, found
 }
 
@@ -143,6 +148,8 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 	isReadingString := false
 	var tmpToken string = ""
 	lenSrc := len(file.Src)
+	lastTokenType := ""
+	canResetTokenType := true
 
 	for fileIndex := 0; fileIndex < lenSrc; fileIndex++ {
 		if file.Src[fileIndex] == '"' {
@@ -150,39 +157,37 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 				isReadingString = true
 				continue
 			} else if fileIndex-1 > 0 && file.Src[fileIndex-1] != '\\' {
-				tokens = append(tokens, token.Token{Type: "VALUE_STRING", Value: tmpToken, HasValue: true})
+				tok := token.Token{Type: "VALUE_STRING", Value: tmpToken, HasValue: true}
+				tokens = append(tokens, tok)
 				tmpToken = ""
 				isReadingString = false
+				lastTokenType = tok.Type
 				continue
 			}
 		}
 		if isReadingString {
 			tmpToken += string(file.Src[fileIndex])
+			continue
 		}
-		if isReadingString == false {
-			tok, ok := scanDelimiterAndOperator(file.Src[fileIndex])
-			if ok {
-				tokens = append(tokens, tok)
-			} else {
-				idx, word := cutWord(fileIndex, file.Src, lenSrc)
-				if idx != fileIndex {
-					fmt.Printf("Found word = [%s]\n", word)
-					fileIndex = idx
-					tok, found := scanKeyword(word)
-					if found {
-						tokens = append(tokens, tok)
-						continue
-					}
-					tok, found = scanIntNumber(word)
-					if found {
-						tokens = append(tokens, tok)
-						continue
-					}
-					fmt.Println("We don't handle this word = ", word)
-
-					// There are word tokens that are numbers to check that, just check word[0].isnumeric() or word[0] == '-' || word[0] == '-', until it finds the number
+		tok, ok := scanDelimiterAndOperator(file.Src[fileIndex])
+		if ok {
+			tokens = append(tokens, tok)
+		} else {
+			idx, word := cutWord(fileIndex, file.Src, lenSrc)
+			if idx != fileIndex {
+				fmt.Printf("Found word = [%s]\n", word)
+				fileIndex = idx
+				tok, found := scanKeyword(word)
+				if found {
+					tokens = append(tokens, tok)
+					continue
 				}
-				continue
+				tok, found = scanIntNumber(word)
+				if found {
+					tokens = append(tokens, tok)
+					continue
+				}
+				fmt.Println("We don't handle this word = ", word)
 			}
 		}
 	}
