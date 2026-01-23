@@ -2,7 +2,7 @@ package debugger
 
 import (
 	"fmt"
-	arguments "leango/src/Args"
+	arguments "leango/src/args"
 	"leango/src/token"
 	"time"
 )

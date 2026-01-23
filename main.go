@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"leango/pkg/debugger"
 	"leango/pkg/helper"
-	arguments "leango/src/Args"
+	arguments "leango/src/args"
 	"leango/src/scanner"
 	"os"
 )
