@@ -5,6 +5,8 @@ import (
 	"leango/pkg/debugger"
 	arguments "leango/src/Args"
 	"leango/src/token"
+	"math"
+	"strings"
 )
 
 func scanDelimiterAndOperator(b byte) (token.Token, bool) {
@@ -86,6 +88,56 @@ func scanKeyword(str string) (token.Token, bool) {
 	return tok, found
 }
 
+func scanIntNumber(str string) (token.Token, bool) {
+	var tok token.Token
+	found := false
+	sign := 1
+	strIndex := 0
+	strLen := len(str)
+	nbOfSigns := 0
+	var foundNumber float64 = 0
+	hasError := false
+
+	if str[0] != '-' && str[0] != '+' && str[0] < '0' || str[0] > '9' {
+		return tok, false
+	}
+
+	if str[0] == '-' {
+		sign = -1
+		 nbOfSigns += 1
+	}
+	for i := 1; i < strLen && str[i] == '-' ||  str[i] == '+'; i++ {
+		if str[0] == '-' {
+			sign *= -1
+		} else {
+			sign *= 1
+		}
+		strIndex = i
+		nbOfSigns += 1
+	}
+	remainingLen:= strLen - nbOfSigns
+	var unexpextedStr strings.Builder
+	for strIndex < strLen {
+		if str[strIndex] < '0' || str[strIndex] > '9' && hasError == false {
+			hasError = true
+		}
+		if remainingLen > 0 && hasError == false {
+			foundNumber += (float64(str[strIndex]) - 48) * math.Pow10(remainingLen - 1)
+		}
+		if hasError {
+			unexpextedStr.WriteByte(str[strIndex])
+		}
+		strIndex++
+		remainingLen--
+	}
+
+	if hasError {
+		fmt.Println("Found unexpextedStr == ", unexpextedStr.String())
+	}
+
+	return tok, found
+}
+
 func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Token {
 	var tokens []token.Token
 	isReadingString := false
@@ -119,7 +171,16 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 					tok, found := scanKeyword(word)
 					if found {
 						tokens = append(tokens, tok)
+						continue
 					}
+					tok, found = scanIntNumber(word)
+					if found {
+						tokens = append(tokens, tok)
+						continue
+					}
+					fmt.Println("We don't handle this word = ", word)
+
+					// There are word tokens that are numbers to check that, just check word[0].isnumeric() or word[0] == '-' || word[0] == '-', until it finds the number
 				}
 				continue
 			}
