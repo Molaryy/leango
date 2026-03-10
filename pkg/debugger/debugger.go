@@ -25,7 +25,7 @@ func IsDebugActivated(flags map[string]arguments.Flag) bool {
 }
 
 func PrintToken(token token.Token) {
-	str := fmt.Sprintf("Type: %s ", token.Type)
+	str := fmt.Sprintf("Type: %s | ", token.Type)
 
 	if token.HasValue {
 		switch v := token.Value.(type) {
@@ -40,6 +40,9 @@ func PrintToken(token token.Token) {
 		default:
 			str += fmt.Sprintf("Unknown type: %T", v)
 		}
+	}
+	if token.IsIdentifier {
+		str += fmt.Sprintf("Name: %s", token.IdentifierName)
 	}
 
 	fmt.Printf("%s\n", str)
