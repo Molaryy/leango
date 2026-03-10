@@ -88,7 +88,7 @@ func scanKeyword(str string) (token.Token, bool) {
 	return tok, found
 }
 
-func scanIntNumber(str string) (token.Token, bool) {
+func scanIntNumber(str string) (token.Token, bool, bool) {
 	var tok token.Token
 	var foundNumber float64 = 0
 	found := false
@@ -99,7 +99,7 @@ func scanIntNumber(str string) (token.Token, bool) {
 	hasError := false
 
 	if str[0] != '-' && str[0] != '+' && str[0] < '0' || str[0] > '9' {
-		return tok, false
+		return tok, false, false
 	}
 
 	if str[0] == '-' {
@@ -140,16 +140,21 @@ func scanIntNumber(str string) (token.Token, bool) {
 			HasValue: true,
 		}
 	}
-	return tok, found
+	return tok, found, hasError
 }
 
-func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Token {
+type StoredDeclarations struct {
+	lineNumber int
+	name       string
+}
+
+func ScanFile(flags map[string]arguments.Flag, file arguments.File) ([]token.Token, bool) {
 	var tokens []token.Token
 	isReadingString := false
 	var tmpToken string = ""
 	lenSrc := len(file.Src)
 	lastTokenType := ""
-	canResetTokenType := true
+	errorFound := false
 
 	for fileIndex := 0; fileIndex < lenSrc; fileIndex++ {
 		if file.Src[fileIndex] == '"' {
@@ -161,7 +166,9 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 				tokens = append(tokens, tok)
 				tmpToken = ""
 				isReadingString = false
-				lastTokenType = tok.Type
+				if tok.Type != "" {
+					lastTokenType = tok.Type
+				}
 				continue
 			}
 		}
@@ -170,24 +177,49 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 			continue
 		}
 		tok, ok := scanDelimiterAndOperator(file.Src[fileIndex])
+		if tok.Type != "" {
+			lastTokenType = tok.Type
+		}
 		if ok {
 			tokens = append(tokens, tok)
 		} else {
 			idx, word := cutWord(fileIndex, file.Src, lenSrc)
 			if idx != fileIndex {
-				fmt.Printf("Found word = [%s]\n", word)
 				fileIndex = idx
 				tok, found := scanKeyword(word)
 				if found {
 					tokens = append(tokens, tok)
+					if tok.Type != "" {
+						lastTokenType = tok.Type
+					}
 					continue
 				}
-				tok, found = scanIntNumber(word)
+				tok, found, err := scanIntNumber(word)
+				if err {
+					errorFound = true
+					break
+				}
 				if found {
 					tokens = append(tokens, tok)
+					if tok.Type != "" {
+						lastTokenType = tok.Type
+					}
 					continue
 				}
-				fmt.Println("We don't handle this word = ", word)
+				if lastTokenType == "OPERATOR_ASSIGN" ||
+					lastTokenType == "OPERATOR_ADDITION" ||
+					lastTokenType == "OPERATOR_MULTIPLICATION" ||
+					lastTokenType == "OPERATOR_SUBTRACTION" ||
+					lastTokenType == "OPERATOR_DIVISION" ||
+					lastTokenType == "DECLARATION_LET" ||
+					lastTokenType == "DECLARATION_CONST" ||
+					lastTokenType == "DECLARATION_FN" {
+					tokens = append(tokens, token.Token{Type: "IDENTIFIER", IsIdentifier: true, IdentifierName: word})
+				} else {
+					errorFound = true
+					fmt.Printf("unexpected name %s\n", word)
+					break
+				}
 			}
 		}
 	}
@@ -198,5 +230,5 @@ func ScanFile(flags map[string]arguments.Flag, file arguments.File) []token.Toke
 		}
 	}
 
-	return tokens
+	return tokens, errorFound
 }
