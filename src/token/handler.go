@@ -11,9 +11,11 @@ import (
 */
 
 type Token struct {
-	Type     string
-	Value    any
-	HasValue bool
+	Type           string
+	Value          any
+	HasValue       bool
+	IsIdentifier   bool
+	IdentifierName string
 }
 
 /*
